@@ -74,8 +74,11 @@ related tickets: ${ticketData.relatedTickets.map((ticket: string) => `${zendeskU
 ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}`);
     }
+
+    return 'Agent processing started successfully'
   } catch (error) {
     console.error('Erro ao processar agente:', error);
+    return error
   }
 };
 
@@ -91,8 +94,9 @@ app.post('/agent', async (request, reply) => {
   }
 
   try {
-    agentProcess(parsed.data as { ticketId: string; subject: string; description: string });
-    return reply.status(200).send({ message: 'Agent processing started successfully' });
+   const data = await agentProcess(parsed.data as { ticketId: string; subject: string; description: string });
+
+    return reply.status(200).send({ message: data });
   } catch (error) {
     console.error('Erro ao processar agente:', error);
     return reply.status(500).send({ error: 'Internal Server Error' });
