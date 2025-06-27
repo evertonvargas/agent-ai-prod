@@ -23,7 +23,7 @@ const createBodySchema = z.object({
 });
 
 const sendSlackNotification = async (text: string) => {
-  console.log("process.env.SLACK_WEBHOOK_URL", process.env.SLACK_WEBHOOK_URL);
+  console.log("sendSlackNotification")
   try {
     await fetch(process.env.SLACK_WEBHOOK_URL!, {
       method: 'POST',
@@ -45,7 +45,7 @@ const agentProcess = async ({
   description: string;
 }) => {
 
-  console.log("process.env.GLEAN_INSTANCE!", process.env.GLEAN_INSTANCE);
+  console.log("start process");
 
   try {
     const response = await glean.client.agents.run({
@@ -54,6 +54,7 @@ const agentProcess = async ({
     });
 
     const lastMessage = response.messages.at(-1)?.content?.[0]?.text;
+    console.log("received response");
 
     if (!lastMessage) throw new Error('Resposta do agente inválida');
 
@@ -102,3 +103,7 @@ export default async function handler(req, reply) {
   await app.ready()
   app.server.emit('request', req, reply)
 }
+
+// app.listen({ host: '0.0.0.0', port: 3000 }).then(() => {
+//   console.log('🚀 HTTP Server running on port 3000');
+// });
