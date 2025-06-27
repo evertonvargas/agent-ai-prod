@@ -23,6 +23,7 @@ const createBodySchema = z.object({
 });
 
 const sendSlackNotification = async (text: string) => {
+  console.log("process.env.SLACK_WEBHOOK_URL", process.env.SLACK_WEBHOOK_URL);
   try {
     await fetch(process.env.SLACK_WEBHOOK_URL!, {
       method: 'POST',
@@ -46,32 +47,35 @@ const agentProcess = async ({
 
   console.log("process.env.GLEAN_INSTANCE!", process.env.GLEAN_INSTANCE);
 
-  const response = await glean.client.agents.run({
-    agentId: process.env.AGENT_ID!,
-    input: { subject, description },
-  });
+  try {
+    const response = await glean.client.agents.run({
+      agentId: process.env.AGENT_ID!,
+      input: { subject, description },
+    });
 
-  const lastMessage = response.messages.at(-1)?.content?.[0]?.text;
+    const lastMessage = response.messages.at(-1)?.content?.[0]?.text;
 
-  if (!lastMessage) throw new Error('Resposta do agente inválida');
+    if (!lastMessage) throw new Error('Resposta do agente inválida');
 
-  const ticketData = JSON.parse(lastMessage);
+    const ticketData = JSON.parse(lastMessage);
 
-  const zendeskUrl = process.env.ZENDESK_URL;
+    console.log("ticketData")
+    const zendeskUrl = process.env.ZENDESK_URL;
 
-  if (ticketData.relatedTickets?.length > 0) {
-    await sendSlackNotification(`:rotating_light: Similar tickets found (last hour):rotating_light:
+    if (ticketData.relatedTickets?.length > 0) {
+      await sendSlackNotification(`:rotating_light: Similar tickets found (last hour):rotating_light:
 ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}
 issueDescription: ${ticketData.issueDescription}
 related tickets: ${ticketData.relatedTickets.map((ticket: string) => `${zendeskUrl}${ticket}`).join(', ')}`);
-  } else {
-    await sendSlackNotification(`:praise-animated: Nenhum outro ticket com o mesmo problema foi encontrado nas últimas 1h.
+    } else {
+      await sendSlackNotification(`:praise-animated: Nenhum outro ticket com o mesmo problema foi encontrado nas últimas 1h.
 ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}`);
+    }
+  } catch (error) {
+    console.error('Erro ao processar agente:', error);
   }
-
-  return response;
 };
 
 app.get('/', async (request, reply) => {
