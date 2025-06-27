@@ -23,7 +23,6 @@ const createBodySchema = z.object({
 });
 
 const sendSlackNotification = async (text: string) => {
-  console.log("sendSlackNotification")
   try {
     await fetch(process.env.SLACK_WEBHOOK_URL!, {
       method: 'POST',
@@ -44,9 +43,6 @@ const agentProcess = async ({
   subject: string;
   description: string;
 }) => {
-
-  console.log("start process");
-
   try {
     const response = await glean.client.agents.run({
       agentId: process.env.AGENT_ID!,
@@ -54,13 +50,11 @@ const agentProcess = async ({
     });
 
     const lastMessage = response.messages.at(-1)?.content?.[0]?.text;
-    console.log("received response");
 
     if (!lastMessage) throw new Error('Resposta do agente inválida');
 
     const ticketData = JSON.parse(lastMessage);
 
-    console.log("ticketData")
     const zendeskUrl = process.env.ZENDESK_URL;
 
     if (ticketData.relatedTickets?.length > 0) {
@@ -74,11 +68,8 @@ related tickets: ${ticketData.relatedTickets.map((ticket: string) => `${zendeskU
 ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}`);
     }
-
-    return 'Agent processing started successfully'
   } catch (error) {
     console.error('Erro ao processar agente:', error);
-    return error
   }
 };
 
@@ -94,9 +85,9 @@ app.post('/agent', async (request, reply) => {
   }
 
   try {
-   const data = await agentProcess(parsed.data as { ticketId: string; subject: string; description: string });
+    agentProcess(parsed.data as { ticketId: string; subject: string; description: string });
 
-    return reply.status(200).send({ message: data });
+    return reply.status(200).send({ message: "Agent processing started successfull" });
   } catch (error) {
     console.error('Erro ao processar agente:', error);
     return reply.status(500).send({ error: 'Internal Server Error' });
@@ -107,7 +98,3 @@ export default async function handler(req, reply) {
   await app.ready()
   app.server.emit('request', req, reply)
 }
-
-// app.listen({ host: '0.0.0.0', port: 3000 }).then(() => {
-//   console.log('🚀 HTTP Server running on port 3000');
-// });
