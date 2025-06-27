@@ -43,6 +43,9 @@ const agentProcess = async ({
   subject: string;
   description: string;
 }) => {
+
+  console.log("process.env.GLEAN_INSTANCE!", process.env.GLEAN_INSTANCE);
+
   const response = await glean.client.agents.run({
     agentId: process.env.AGENT_ID!,
     input: { subject, description },
@@ -91,6 +94,7 @@ app.post('/agent', async (request, reply) => {
   }
 });
 
-app.listen({ host: '0.0.0.0', port: 3000 }).then(() => {
-  console.log('🚀 HTTP Server running on port 3000');
-});
+export default async function handler(req, reply) {
+  await app.ready()
+  app.server.emit('request', req, reply)
+}
