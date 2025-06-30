@@ -17,7 +17,7 @@ const glean = new Glean({
 });
 
 const createBodySchema = z.object({
-  ticketId: z.string(),
+  ticketId: z.number().int().positive(),
   subject: z.string(),
   description: z.string(),
 });
@@ -40,7 +40,7 @@ const agentProcess = async ({
   subject,
   description,
 }: {
-  ticketId: string;
+  ticketId: number;
   subject: string;
   description: string;
 }) => {
@@ -54,13 +54,11 @@ const agentProcess = async ({
     });
 
     const lastMessage = response.messages.at(-1)?.content?.[0]?.text;
-    console.log("received response");
 
     if (!lastMessage) throw new Error('Resposta do agente inválida');
 
     const ticketData = JSON.parse(lastMessage);
 
-    console.log("ticketData")
     const zendeskUrl = process.env.ZENDESK_URL;
 
     if (ticketData.relatedTickets?.length > 0) {
@@ -94,7 +92,7 @@ app.post('/agent', async (request, reply) => {
   }
 
   try {
-   const data = await agentProcess(parsed.data as { ticketId: string; subject: string; description: string });
+   const data = await agentProcess(parsed.data as { ticketId: number; subject: string; description: string });
 
     return reply.status(200).send({ message: data });
   } catch (error) {
