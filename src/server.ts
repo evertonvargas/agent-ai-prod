@@ -17,9 +17,11 @@ const glean = new Glean({
 });
 
 const createBodySchema = z.object({
-  ticketId: z.number().int().positive(),
-  subject: z.string(),
-  description: z.string(),
+  ticket: z.object({
+    ticketId: z.number().int().positive(),
+    subject: z.string(),
+    description: z.string(),
+  }),
 });
 
 const sendSlackNotification = async (text: string) => {
@@ -35,15 +37,13 @@ const sendSlackNotification = async (text: string) => {
   }
 };
 
+type Ticket = z.infer<typeof createBodySchema>['ticket'];
+
 const agentProcess = async ({
   ticketId,
   subject,
   description,
-}: {
-  ticketId: number;
-  subject: string;
-  description: string;
-}) => {
+}: Ticket) => {
 
   console.log("start process");
 
@@ -92,7 +92,9 @@ app.post('/agent', async (request, reply) => {
   }
 
   try {
-   const data = await agentProcess(parsed.data as { ticketId: number; subject: string; description: string });
+    const { ticket } = parsed.data;
+
+    const data = await agentProcess(ticket);
 
     return reply.status(200).send({ message: data });
   } catch (error) {
