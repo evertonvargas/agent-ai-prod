@@ -18,7 +18,7 @@ const glean = new Glean({
 
 const createBodySchema = z.object({
   ticket: z.object({
-    ticketId: z.number().int().positive(),
+    ticketId: z.any(),
     subject: z.string(),
     description: z.string(),
   }),
