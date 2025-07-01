@@ -67,10 +67,6 @@ ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}
 issueDescription: ${ticketData.issueDescription}
 related tickets: ${ticketData.relatedTickets.map((ticket: string) => `${zendeskUrl}${ticket}`).join(', ')}`);
-    } else {
-      await sendSlackNotification(`:praise-animated: Nenhum outro ticket com o mesmo problema foi encontrado nas últimas 1h.
-ticketId: ${zendeskUrl}${ticketId}
-ticketTitle: ${ticketData.ticketTitle}`);
     }
 
     return 'Agent processing started successfully'
