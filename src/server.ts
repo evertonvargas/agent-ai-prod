@@ -60,13 +60,14 @@ const agentProcess = async ({
     const ticketData = JSON.parse(lastMessage);
 
     const zendeskUrl = process.env.ZENDESK_URL;
+    const relatedTickets = ticketData?.relatedTickets?.filter((ticket: string) => ticket !== ticketId);
 
-    if (ticketData.relatedTickets?.length > 0) {
+    if (relatedTickets?.length > process.env.QTD_TICKETS) {
       await sendSlackNotification(`:rotating_light: Similar tickets found (last hour):rotating_light:
 ticketId: ${zendeskUrl}${ticketId}
 ticketTitle: ${ticketData.ticketTitle}
 issueDescription: ${ticketData.issueDescription}
-related tickets: ${ticketData.relatedTickets.map((ticket: string) => `${zendeskUrl}${ticket}`).join(', ')}`);
+related tickets: ${relatedTickets.map((ticket: string) => `${zendeskUrl}${ticket}`).join(', ')}`);
     }
 
     return 'Agent processing started successfully'
