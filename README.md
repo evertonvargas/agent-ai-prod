@@ -20,5 +20,3 @@
 ## 🚀 Deploy
 
 Este projeto está em produção e foi implantado usando **Vercel**, o que permite que ele seja executado como uma função serverless com alta disponibilidade.
-
-> A URL de produção pode ser configurada nas variáveis de ambiente, e os endpoints são acessados diretamente via chamadas HTTP.
